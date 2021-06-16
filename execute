@@ -50,7 +50,7 @@ repos.each_with_index do |repo, i|
   dir = "repos/#{repo}"
   puts "#{repo}:" unless silent
   Dir.chdir dir
-  system ARGV.join(' ')
+  system "REPO=#{repo}; #{ARGV.join(' ')}"
   Dir.chdir base_dir
   puts unless silent || i == repos.length - 1
 end

@@ -36,6 +36,12 @@ Easily interact with multiple Git repos.
     ./execute -s -- grep foo bar.txt
     ```
 
+    You also have access to the repo path:
+
+    ```shell
+    ./execute 'echo $REPO'
+    ```
+
 1. See all open PRs on GitHub:
 
     ```shell
