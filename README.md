@@ -21,17 +21,17 @@ Easily interact with multiple Git repos.
 1. Clone all repos:
 
     ```shell
-    ./scripts/clone
+    ./clone
     ```
 
 1. Execute a command on all repos:
 
     ```shell
-    ./scripts/execute git status
+    ./execute git status
     ```
 
 1. See all open PRs on GitHub:
 
     ```shell
-    ./scripts/open-prs
+    ./open-prs
     ```
