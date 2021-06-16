@@ -30,6 +30,12 @@ Easily interact with multiple Git repos.
     ./execute git status
     ```
 
+    Or if you need to process the output:
+
+    ```shell
+    ./execute -s -- grep foo bar.txt
+    ```
+
 1. See all open PRs on GitHub:
 
     ```shell
