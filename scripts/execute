@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+  echo "you must specify something to execute." >&2
+  exit 1
+fi
+
+if [ ! -f repos.txt ]; then
+  echo "file not found: repos.txt" >&2
+  echo "" >&2
+  echo "repos.txt should contain a list of Git repo paths like:" >&2
+  echo "  nicholasdower/foo" >&2
+  echo "  nicholasdower/bar" >&2
+  exit 1
+fi
+
+for repo in `cat repos.txt`; do
+  dir=repos/$repo
+  if [ ! -d "$dir" ]; then
+    echo "directory does not exist: $dir" >&2
+    exit 1
+  fi
+done
+
+BASE=$(pwd)
+
+for repo in `cat repos.txt`; do
+  dir=repos/$repo
+  echo $dir:
+  cd "$dir"
+  $@; 
+  echo
+  cd $BASE
+done

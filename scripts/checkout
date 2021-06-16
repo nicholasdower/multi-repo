@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [ ! -f repos.txt ]; then
+  echo "file not found: repos.txt" >&2
+  echo "" >&2
+  echo "repos.txt should contain a list of Git repo paths like:" >&2
+  echo "  nicholasdower/foo" >&2
+  echo "  nicholasdower/bar" >&2
+  exit 1
+fi
+
+mkdir -p repos
+
+for repo in `cat repos.txt`; do
+  dir=repos/$repo
+  echo $repo:
+  if [ -d "$dir" ]; then
+    echo "directory already exists"
+  else
+    git clone git@github.com:$repo.git $dir
+    if [ $? -ne 0 ]; then
+      echo "failed to clone: git@github.com:$dir.git" >&2
+      exit 1
+    fi
+  fi
+  echo
+done
+
+cd repos
+for dir in `ls -d -1 */*`; do
+  grep "^$dir$" ../repos.txt >/dev/null
+  if [ $? -ne 0 ]; then
+    echo "encountered unexpected directory: $dir"
+  fi
+done
