@@ -14,7 +14,16 @@ def check_repos_txt(check_exist: true)
     exit 1
   end
 
-  repos = File.readlines('repos.txt').map(&:strip)
+  repos = File.readlines('repos.txt').map(&:strip).reject { |r| r.empty? || r.start_with?('#') }
+
+  if repos.empty?
+    STDERR.puts 'ERROR: No repo paths found in: repos.txt'
+    STDERR.puts ''
+    STDERR.puts 'repos.txt should contain a list of Git repo paths like:'
+    STDERR.puts '  nicholasdower/foo'
+    STDERR.puts '  nicholasdower/bar'
+    exit 1
+  end
 
   if check_exist
     repos.each do |repo|
