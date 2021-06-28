@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+Dir.chdir __dir__
+
 require './lib/util.rb'
 require 'optparse'
 
