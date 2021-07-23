@@ -28,7 +28,7 @@ def check_repos_txt(check_exist: true)
   if check_exist
     repos.each do |repo|
       dir = "repos/#{repo}"
-      unless Dir.exists? dir
+      unless Dir.exist? dir
         STDERR.puts "ERROR: Directory does not exist: #{dir}"
         exit 1
       end
