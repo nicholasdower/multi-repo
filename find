@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+
+Dir.chdir __dir__
+
+require './lib/util.rb'
+require 'optparse'
+
+options = {
+  not: false,
+  delimiter: ','
+}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Finds repos which match a filter.\n"
+  opts.banner += "\n"
+  opts.banner += "Usage: ./find [--not] [--delimiter DELIMITER] -- COMMAND\n"
+  opts.banner += "\n"
+  opts.banner += "Example: ./find ls somefile\n"
+  opts.banner += "Example: ./find --not -- ls somefile\n"
+  opts.banner += "\n"
+  opts.banner += "Options:\n"
+
+  opts.on('-n', '--not', 'Optional. Find repos which do not match.') do
+    options[:not] = true
+  end
+
+  opts.on('-d', '--delimiter DELIMITER', 'Optional. Output delimiter. Defaults to comma.') do |delimiter|
+    options[:delimiter] = delimiter
+  end
+end
+
+parser.parse!
+
+if ARGV.length == 0 then
+  warn "fatal: no command specified"
+  warn ''
+  puts parser.help
+  exit 1
+end
+
+command = ARGV.join(' ')
+
+repos = check_repos_txt
+
+base_dir = Dir.pwd
+
+matches = repos.select do |repo|
+  Dir.chdir "repos/#{repo}"
+
+  result = system(command, out: File::NULL, err: File::NULL)
+
+  Dir.chdir base_dir
+
+  if options[:not]
+    !result
+  else
+    result
+  end
+end
+
+puts matches.join("\"#{options[:delimiter]}\"".undump)

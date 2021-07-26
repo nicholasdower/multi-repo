@@ -5,38 +5,87 @@ Dir.chdir __dir__
 require './lib/util.rb'
 require 'optparse'
 
-options = {}
+options = { }
 
 parser = OptionParser.new do |opts|
-  opts.banner = 'Executes the specified command on each repo.'
-  opts.banner += "\n\n"
-  opts.banner += 'Usage: ./scripts/execute [-s] <command>'
+  opts.banner = "Executes the specified command on each repo or optionally the specified repos.\n"
+  opts.banner += "\n"
+  opts.banner += "Usage: ./execute [--quiet] [--repost <repo...>|--filter <file>] -- <command>\n"
+  opts.banner += "\n"
+  opts.banner += "Example: ./execute git pull\n"
+  opts.banner += "Example: ./execute -- git branch --show-current\n"
+  opts.banner += "Example: ./execute 'git checkout master && git pull'\n"
+  opts.banner += "\n"
+  opts.banner += "Options:\n"
 
-  opts.on('-s', '--silent', 'Don\'t print repo paths before executing command.') do |s|
-    options[:silent] = s
+  opts.on('-q', '--quiet', 'Optional. If set, repo paths will not be pringted before executing command.') do |s|
+    options[:quiet] = s
+  end
+
+  opts.on('-r', '--repos REPOS', 'Optional. Comma-separated list of repos. By default the command will be executed on all repos.') do |repos|
+    options[:repos] = repos.split(',')
+  end
+
+  opts.on('-f', '--filter FILE', 'Optional. A file containing a list of repos. By default the command will be executed on all repos.') do |filename|
+    options[:filter] = filename
   end
 end
 
 parser.parse!
 
-silent = options[:silent]
-
 if ARGV.length == 0 then
-  STDERR.puts 'ERROR: You must specify something to execute.'
-  STDERR.puts
-  STDERR.puts parser.help
+  warn 'fatal: you must specify something to execute'
+  warn ''
+  puts parser.help
+  exit 1
+end
+
+if options[:filter] and options[:repos]
+  warn 'fatal: --filter and --repos specified, 0 or 1 expected'
+  warn ''
+  puts parser.help
+  exit 1
+end
+
+if options[:filter] and !File.exist?(options[:filter])
+  warn "fatal: no such file #{options[:filter]}"
+  warn ''
+  puts parser.help
   exit 1
 end
 
 repos = check_repos_txt
 
+if options[:filter] or options[:repos]
+  filtered = options[:repos] || File.readlines(options[:filter]).map(&:strip)
+
+  if filtered.empty?
+    warn 'fatal: no repos specified'
+    warn ''
+    puts parser.help
+    exit 1
+  end
+
+  filtered.each do |repo|
+    unless repos.index(repo)
+      warn "fatal: no such repo #{repo}"
+      warn ''
+      puts parser.help
+      exit 1
+    end
+  end
+
+  repos = filtered
+end
+
 base_dir = Dir.pwd
 
 repos.each_with_index do |repo, i|
-  dir = "repos/#{repo}"
-  puts "#{repo}:" unless silent
-  Dir.chdir dir
+  Dir.chdir "repos/#{repo}"
+
+  puts "#{repo}:" unless options[:quiet]
   system "REPO=#{repo}; #{ARGV.join(' ')}"
+
   Dir.chdir base_dir
-  puts unless silent || i == repos.length - 1
+  puts unless options[:quiet] || i == repos.length - 1
 end
